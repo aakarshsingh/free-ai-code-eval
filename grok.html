@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Favorite Cricket XI</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 30px;
+        }
+        .container {
+            display: flex;
+            gap: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .cricketers-list, .selected-team {
+            background-color: #fff;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            width: 50%;
+            min-height: 400px;
+            overflow-y: auto;
+        }
+        .cricketers-list h2, .selected-team h2 {
+            margin-top: 0;
+            color: #34495e;
+            font-size: 1.5em;
+        }
+        .cricketer-card {
+            background-color: #ecf0f1;
+            border: 2px dashed #bdc3c7;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px 0;
+            cursor: move;
+            transition: transform 0.2s, background-color 0.2s;
+        }
+        .cricketer-card:hover {
+            transform: scale(1.02);
+            background-color: #dfe6e9;
+        }
+        .cricketer-card.dragging {
+            opacity: 0.5;
+        }
+        .selected-team .cricketer-card {
+            border-style: solid;
+            border-color: #3498db;
+            background-color: #e9f5ff;
+        }
+        .dropzone {
+            min-height: 200px;
+            text-align: center;
+            color: #7f8c8d;
+            padding: 20px;
+        }
+        .dropzone.dragover {
+            background-color: #d5f4e6;
+            border: 2px dashed #27ae60;
+        }
+        .counter {
+            font-size: 1.1em;
+            color: #e74c3c;
+            margin-top: 10px;
+        }
+        .counter.valid {
+            color: #27ae60;
+        }
+    </style>
+</head>
+<body>
+    <h1>My Favorite Cricket XI</h1>
+    <div class="container">
+        <div class="cricketers-list">
+            <h2>All Cricketers</h2>
+            <div id="cricketers"></div>
+        </div>
+        <div class="selected-team">
+            <h2>Selected Team (<span id="team-count">0</span>/11)</h2>
+            <div id="selected" class="dropzone">
+                Drag cricketers here to build your team
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const cricketersData = [
+            {"name":"Sachin Tendulkar","position":"Batter (Opener)","country":"India"},{"name":"Kumar Sangakkara","position":"Batter (Wicket-keeper/Middle Order)","country":"Sri Lanka"},{"name":"Ricky Ponting","position":"Batter (Middle Order)","country":"Australia"},{"name":"Virat Kohli","position":"Batter (Middle Order)","country":"India"},{"name":"AB de Villiers","position":"Batter (Middle Order)","country":"South Africa"},{"name":"Rohit Sharma","position":"Batter (Opener)","country":"India"},{"name":"Sanath Jayasuriya","position":"Batter (Opener)","country":"Sri Lanka"},{"name":"Sourav Ganguly","position":"Batter (Middle Order)","country":"India"},{"name":"Rahul Dravid","position":"Batter (Middle Order)","country":"India"},{"name":"Mahela Jayawardene","position":"Batter (Middle Order)","country":"Sri Lanka"},{"name":"Brian Lara","position":"Batter (Middle Order)","country":"West Indies"},{"name":"Shakib Al Hasan","position":"All-rounder","country":"Bangladesh"},{"name":"Jacques Kallis","position":"All-rounder","country":"South Africa"},{"name":"Andrew Flintoff","position":"All-rounder","country":"England"},{"name":"Shahid Afridi","position":"All-rounder","country":"Pakistan"},{"name":"Yuvraj Singh","position":"All-rounder","country":"India"},{"name":"Shane Watson","position":"All-rounder","country":"Australia"},{"name":"Abdul Razzaq","position":"All-rounder","country":"Pakistan"},{"name":"Daniel Vettori","position":"All-rounder","country":"New Zealand"},{"name":"Ravindra Jadeja","position":"All-rounder","country":"India"},{"name":"Mitchell Marsh","position":"All-rounder","country":"Australia"},{"name":"Hardik Pandya","position":"All-rounder","country":"India"},{"name":"Lasith Malinga","position":"Bowler (Fast)","country":"Sri Lanka"},{"name":"Muttiah Muralitharan","position":"Bowler (Spin)","country":"Sri Lanka"},{"name":"Wasim Akram","position":"Bowler (Fast)","country":"Pakistan"},{"name":"Glenn McGrath","position":"Bowler (Fast-Medium)","country":"Australia"},{"name":"Shaun Pollock","position":"Bowler (Fast-Medium)","country":"South Africa"},{"name":"James Anderson","position":"Bowler (Fast-Medium)","country":"England"},{"name":"Dale Steyn","position":"Bowler (Fast)","country":"South Africa"},{"name":"Brett Lee","position":"Bowler (Fast)","country":"Australia"},{"name":"Harbhajan Singh","position":"Bowler (Spin)","country":"India"},{"name":"Zaheer Khan","position":"Bowler (Fast-Medium)","country":"India"},{"name":"Chaminda Vaas","position":"Bowler (Fast-Medium)","country":"Sri Lanka"},{"name":"Shoaib Akhtar","position":"Bowler (Fast)","country":"Pakistan"},{"name":"Shane Warne","position":"Bowler (Spin)","country":"Australia"},{"name":"Mitchell Starc","position":"Bowler (Fast)","country":"Australia"},{"name":"Trent Boult","position":"Bowler (Fast)","country":"New Zealand"},{"name":"Jasprit Bumrah","position":"Bowler (Fast)","country":"India"},{"name":"Kagiso Rabada","position":"Bowler (Fast)","country":"South Africa"},{"name":"Rashid Khan","position":"Bowler (Spin)","country":"Afghanistan"},{"name":"Yuzvendra Chahal","position":"Bowler (Spin)","country":"India"},{"name":"Kuldeep Yadav","position":"Bowler (Spin)","country":"India"},{"name":"Adam Zampa","position":"Bowler (Spin)","country":"Australia"},{"name":"Nathan Lyon","position":"Bowler (Spin)","country":"Australia"},{"name":"Marlon Samuels","position":"Batter (Middle Order)","country":"West Indies"},{"name":"Tillakaratne Dilshan","position":"Batter (Opener)","country":"Sri Lanka"},{"name":"Martin Guptill","position":"Batter (Opener)","country":"New Zealand"},{"name":"Hashim Amla","position":"Batter (Opener)","country":"South Africa"},{"name":"Quinton de Kock","position":"Batter (Wicket-keeper/Opener)","country":"South Africa"},{"name":"David Warner","position":"Batter (Opener)","country":"Australia"},{"name":"Aaron Finch","position":"Batter (Opener)","country":"Australia"},{"name":"Shikhar Dhawan","position":"Batter (Opener)","country":"India"},{"name":"Ross Taylor","position":"Batter (Middle Order)","country":"New Zealand"},{"name":"Kane Williamson","position":"Batter (Middle Order)","country":"New Zealand"},{"name":"Joe Root","position":"Batter (Middle Order)","country":"England"},{"name":"Eoin Morgan","position":"Batter (Middle Order)","country":"England"},{"name":"MS Dhoni","position":"Batter (Wicket-keeper/Middle Order)","country":"India"},{"name":"Jos Buttler","position":"Batter (Wicket-keeper/Middle Order)","country":"England"},{"name":"Babar Azam","position":"Batter (Middle Order)","country":"Pakistan"},{"name":"Fakhar Zaman","position":"Batter (Opener)","country":"Pakistan"},{"name":"Imam-ul-Haq","position":"Batter (Opener)","country":"Pakistan"},{"name":"Steve Smith","position":"Batter (Middle Order)","country":"Australia"},{"name":"Glenn Maxwell","position":"All-rounder","country":"Australia"},{"name":"Marcus Stoinis","position":"All-rounder","country":"Australia"},{"name":"Ben Stokes","position":"All-rounder","country":"England"},{"name":"Chris Woakes","position":"All-rounder","country":"England"},{"name":"Moeen Ali","position":"All-rounder","country":"England"},{"name":"Mohammad Nabi","position":"All-rounder","country":"Afghanistan"},{"name":"Rashid Khan","position":"All-rounder","country":"Afghanistan"},{"name":"Jhye Richardson","position":"Bowler (Fast)","country":"Australia"},{"name":"Pat Cummins","position":"Bowler (Fast)","country":"Australia"},{"name":"Josh Hazlewood","position":"Bowler (Fast-Medium)","country":"Australia"},{"name":"Tim Southee","position":"Bowler (Fast-Medium)","country":"New Zealand"},{"name":"Lockie Ferguson","position":"Bowler (Fast)","country":"New Zealand"},{"name":"Shaheen Afridi","position":"Bowler (Fast)","country":"Pakistan"},{"name":"Hasan Ali","position":"Bowler (Fast)","country":"Pakistan"},{"name":"Mohammad Amir","position":"Bowler (Fast)","country":"Pakistan"},{"name":"Stuart Broad","position":"Bowler (Fast-Medium)","country":"England"},{"name":"Jofra Archer","position":"Bowler (Fast)","country":"England"},{"name":"Mark Wood","position":"Bowler (Fast)","country":"England"},{"name":"Adil Rashid","position":"Bowler (Spin)","country":"England"},{"name":"Ravichandran Ashwin","position":"Bowler (Spin)","country":"India"},{"name":"Mohammad Shami","position":"Bowler (Fast)","country":"India"},{"name":"Bhuvneshwar Kumar","position":"Bowler (Fast-Medium)","country":"India"},{"name":"Anrich Nortje","position":"Bowler (Fast)","country":"South Africa"},{"name":"Lungi Ngidi","position":"Bowler (Fast)","country":"South Africa"},{"name":"Tabraiz Shamsi","position":"Bowler (Spin)","country":"South Africa"},{"name":"Keshav Maharaj","position":"Bowler (Spin)","country":"South Africa"},{"name":"Mustafizur Rahman","position":"Bowler (Fast-Medium)","country":"Bangladesh"},{"name":"Mehedi Hasan","position":"Bowler (Spin)","country":"Bangladesh"}
+        ];
+
+        const cricketersContainer = document.getElementById('cricketers');
+        const selectedContainer = document.getElementById('selected');
+        const teamCount = document.getElementById('team-count');
+
+        // Render cricketers
+        cricketersData.forEach(cricketer => {
+            const card = createCricketerCard(cricketer);
+            cricketersContainer.appendChild(card);
+        });
+
+        function createCricketerCard(cricketer) {
+            const card = document.createElement('div');
+            card.classList.add('cricketer-card');
+            card.draggable = true;
+            card.innerHTML = `<strong>${cricketer.name}</strong><br>${cricketer.position}<br>${cricketer.country}`;
+            card.dataset.name = cricketer.name;
+            return card;
+        }
+
+        // Drag and Drop functionality
+        cricketersContainer.addEventListener('dragstart', handleDragStart);
+        selectedContainer.addEventListener('dragstart', handleDragStart);
+        cricketersContainer.addEventListener('dragover', handleDragOver);
+        selectedContainer.addEventListener('dragover', handleDragOver);
+        cricketersContainer.addEventListener('drop', handleDrop);
+        selectedContainer.addEventListener('drop', handleDrop);
+        cricketersContainer.addEventListener('dragenter', handleDragEnter);
+        selectedContainer.addEventListener('dragenter', handleDragEnter);
+        cricketersContainer.addEventListener('dragleave', handleDragLeave);
+        selectedContainer.addEventListener('dragleave', handleDragLeave);
+
+        let draggedElement = null;
+
+        function handleDragStart(e) {
+            if (e.target.classList.contains('cricketer-card')) {
+                draggedElement = e.target;
+                e.target.classList.add('dragging');
+                e.dataTransfer.setData('text/plain', e.target.dataset.name);
+            }
+        }
+
+        function handleDragOver(e) {
+            e.preventDefault();
+        }
+
+        function handleDragEnter(e) {
+            e.preventDefault();
+            if (e.target === cricketersContainer || e.target === selectedContainer) {
+                e.target.classList.add('dragover');
+            }
+        }
+
+        function handleDragLeave(e) {
+            if (e.target === cricketersContainer || e.target === selectedContainer) {
+                e.target.classList.remove('dragover');
+            }
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            const target = e.target === selectedContainer ? selectedContainer : cricketersContainer;
+            target.classList.remove('dragover');
+
+            if (draggedElement) {
+                const selectedCount = selectedContainer.querySelectorAll('.cricketer-card').length;
+                if (target === selectedContainer && selectedCount >= 11 && !draggedElement.parentElement === selectedContainer) {
+                    alert('You can only select 11 cricketers!');
+                    draggedElement.classList.remove('dragging');
+                    draggedElement = null;
+                    return;
+                }
+
+                target.appendChild(draggedElement);
+                draggedElement.classList.remove('dragging');
+                updateTeamCount();
+                draggedElement = null;
+
+                if (selectedContainer.children.length === 1 && selectedContainer.firstChild.classList.contains('dropzone')) {
+                    selectedContainer.innerHTML = '';
+                }
+            }
+        }
+
+        function updateTeamCount() {
+            const count = selectedContainer.querySelectorAll('.cricketer-card').length;
+            teamCount.textContent = count;
+            teamCount.classList.toggle('valid', count === 11);
+        }
+    </script>
+</body>
+</html>
